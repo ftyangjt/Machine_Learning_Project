@@ -91,6 +91,7 @@ class VectorizedSignalStrategy(bt.Strategy):
 
     def __init__(self):
         self.signal = self.data.signal
+        self.total_commission = 0.0
 
     def notify_order(self, order):
         if order.status in [order.Completed]:
@@ -101,6 +102,7 @@ class VectorizedSignalStrategy(bt.Strategy):
             print(f"[{dt}] {order.data._name} {'BUY' if order.isbuy() else 'SELL'} "
                   f"Size: {order.executed.size:.2f} @ {order.executed.price:.4f} "
                   f"Comm: {order.executed.comm:.2f} Cost: {order.executed.value:.2f}")
+            self.total_commission += order.executed.comm
 
     def next(self):
         # 获取当前信号权重
@@ -175,6 +177,7 @@ def run_backtest(
     cerebro.addanalyzer(bt.analyzers.DrawDown, _name='drawdown')
     cerebro.addanalyzer(bt.analyzers.Returns, _name='returns')
     cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='trades')
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='timereturn')
     
     results = cerebro.run()
     strat_result = results[0]
@@ -202,9 +205,17 @@ def run_backtest(
     # 简单计算平均每笔交易收益 (近似值)
     metrics['avg_trade_return'] = 0.0 
     
+    # 获取总手续费
+    metrics['total_commission'] = round(strat_result.total_commission, 2)
+    
+    # 获取每日收益率序列
+    timereturn_analyzer = strat_result.analyzers.timereturn.get_analysis()
+    returns_series = pd.Series(timereturn_analyzer)
+
     return {
         'strategy': strategy_name,
-        **metrics
+        **metrics,
+        'returns_series': returns_series
     }
 
 # ============================= CLI Runner =============================
@@ -235,6 +246,8 @@ def main():
         raise ValueError('筛选后无数据')
 
     results = []
+    equity_curves = {}
+
     for name in args.strategies:
         if name not in STRATEGY_MAP:
             print(f"跳过未知策略: {name}")
@@ -257,6 +270,11 @@ def main():
             capital=args.capital,
             max_position=args.max_position
         )
+        
+        # 提取收益率序列用于绘图，并从结果中移除以免影响汇总表
+        if 'returns_series' in res:
+            equity_curves[name] = res.pop('returns_series')
+            
         results.append(res)
 
     # 汇总输出
@@ -267,6 +285,44 @@ def main():
     if args.output:
         summary_df.to_csv(args.output, index=False)
         print(f'结果已保存: {args.output}')
+        
+    # 绘制收益曲线
+    try:
+        import matplotlib.pyplot as plt
+        
+        plt.figure(figsize=(12, 8))
+        
+        for name, ret_series in equity_curves.items():
+            # 将索引转换为 datetime 对象 (如果还不是)
+            ret_series.index = pd.to_datetime(ret_series.index)
+            
+            # 计算累计收益 (净值曲线)
+            # 初始资金 * (1 + 收益率).cumprod()
+            equity_curve = args.capital * (1 + ret_series).cumprod()
+            
+            plt.plot(equity_curve.index, equity_curve.values, label=name)
+            
+        plt.title('Strategy Equity Curves Comparison')
+        plt.xlabel('Date')
+        plt.ylabel('Equity (Capital)')
+        plt.legend()
+        plt.grid(True)
+        
+        # 保存图片
+        plot_filename = 'strategy_comparison.png'
+        if args.output:
+            plot_filename = str(Path(args.output).with_suffix('.png'))
+            
+        plt.savefig(plot_filename)
+        print(f"收益曲线图已保存至: {plot_filename}")
+        
+        # 尝试显示 (如果在支持 GUI 的环境中)
+        # plt.show()
+        
+    except ImportError:
+        print("未安装 matplotlib，跳过绘图。")
+    except Exception as e:
+        print(f"绘图时发生错误: {e}")
 
 if __name__ == '__main__':
     main()

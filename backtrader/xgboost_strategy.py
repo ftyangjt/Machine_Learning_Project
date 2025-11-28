@@ -57,12 +57,12 @@ class XGBoostStrategy(Strategy):
 
         print(f"[{self.name}] Training XGBoost model on {len(X_train)} samples...")
         self.model = xgb.XGBClassifier(
-            n_estimators=100,
-            learning_rate=0.1,
+            n_estimators=200,
+            learning_rate=0.01,
             max_depth=5,
             subsample=0.8,
             colsample_bytree=0.8,
-            random_state=42,
+            random_state=3,
             eval_metric='logloss'
         )
         self.model.fit(X_train, y_train)
@@ -118,8 +118,23 @@ class XGBoostStrategy(Strategy):
             # predict_proba returns [prob_0, prob_1]
             probs = self.model.predict_proba(X_test)[:, 1]
             
-            # Signal logic: > 0.5 -> 1 (Buy/Hold), else 0
-            signals = (probs > 0.5).astype(int)
+            # 改进策略：引入滞后阈值 (Hysteresis) 防止过早止盈
+            # 逻辑：
+            # 1. 入场/加仓：信心较高 (Prob > 0.55)
+            # 2. 离场/止损：信心较低 (Prob < 0.45)
+            # 3. 持仓观望：信心一般 (0.45 <= Prob <= 0.55)，保持现有仓位
+            
+            signals = []
+            current_pos = 0 # 初始假设空仓
+            
+            for p in probs:
+                if p > 0.55:
+                    current_pos = 1
+                elif p < 0.45:
+                    current_pos = 0
+                # else: 保持 current_pos 不变 (Hold)
+                
+                signals.append(current_pos)
             
             return pd.Series(signals, index=valid_indices).reindex(df.index).fillna(0)
         else:
