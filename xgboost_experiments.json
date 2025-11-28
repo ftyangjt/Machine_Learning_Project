@@ -1,0 +1,26 @@
+[
+    {
+        "timestamp": "2025-11-28 17:21:45",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.595,
+            "cagr": 0.442702,
+            "max_drawdown": 0.110027,
+            "sharpe": 3.303626,
+            "trade_count": 23,
+            "win_rate": 0.608696,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    }
+]

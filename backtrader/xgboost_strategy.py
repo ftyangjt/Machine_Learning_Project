@@ -10,7 +10,7 @@ class XGBoostStrategy(Strategy):
     name = "xgboost"
 
     def __init__(self):
-        self.model = None
+        self.models = [] # Changed from self.model to self.models list
         self.features = [
             'open', 'high', 'low', 'close', 'volume',
             'ma5', 'ma10', 'ma20',
@@ -56,17 +56,27 @@ class XGBoostStrategy(Strategy):
         y_train = train_data['target']
 
         print(f"[{self.name}] Training XGBoost model on {len(X_train)} samples...")
-        self.model = xgb.XGBClassifier(
-            n_estimators=200,
-            learning_rate=0.01,
-            max_depth=5,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            random_state=3,
-            eval_metric='logloss'
-        )
-        self.model.fit(X_train, y_train)
-        print(f"[{self.name}] Training complete.")
+        
+        # 为了评估模型的平均表现，我们训练多个不同随机种子的模型并取平均预测
+        n_models = 50
+        self.models = []
+        
+        for i in range(n_models):
+            seed = 42 + i
+            model = xgb.XGBClassifier(
+                n_estimators=200,
+                learning_rate=0.02,
+                max_depth=5,
+                subsample=0.8,
+                colsample_bytree=0.8,
+                random_state=seed,
+                eval_metric='logloss',
+                n_jobs=-1
+            )
+            model.fit(X_train, y_train)
+            self.models.append(model)
+            
+        print(f"[{self.name}] Training complete. Ensemble of {n_models} models created.")
 
     def _engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
         # Base features must exist
@@ -97,7 +107,7 @@ class XGBoostStrategy(Strategy):
         return df
 
     def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        if self.model is None:
+        if not hasattr(self, 'models') or not self.models:
             return pd.Series(0, index=df.index)
 
         # We need context for lag features. 
@@ -114,9 +124,12 @@ class XGBoostStrategy(Strategy):
             valid_indices = df.index.intersection(full_feat.index)
             X_test = full_feat.loc[valid_indices, self.feature_names]
             
-            # Predict
-            # predict_proba returns [prob_0, prob_1]
-            probs = self.model.predict_proba(X_test)[:, 1]
+            # Predict using Ensemble
+            # Average the probabilities from all models
+            avg_probs = np.zeros(len(X_test))
+            for model in self.models:
+                avg_probs += model.predict_proba(X_test)[:, 1]
+            avg_probs /= len(self.models)
             
             # 改进策略：引入滞后阈值 (Hysteresis) 防止过早止盈
             # 逻辑：
@@ -127,7 +140,7 @@ class XGBoostStrategy(Strategy):
             signals = []
             current_pos = 0 # 初始假设空仓
             
-            for p in probs:
+            for p in avg_probs:
                 if p > 0.55:
                     current_pos = 1
                 elif p < 0.45:

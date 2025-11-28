@@ -6,6 +6,9 @@ import pandas as pd
 import numpy as np
 import math
 import backtrader as bt
+import json
+import datetime
+import os
 
 # Import Strategy Base and Concrete Strategies
 
@@ -142,6 +145,7 @@ def run_backtest(
     apply_fees: bool = False,
     capital: float = 100000.0,
     max_position: float = 1.0,
+    strat_obj: Optional[Strategy] = None,
 ) -> Dict:
     
     # 将信号合并到 DataFrame
@@ -211,12 +215,79 @@ def run_backtest(
     # 获取每日收益率序列
     timereturn_analyzer = strat_result.analyzers.timereturn.get_analysis()
     returns_series = pd.Series(timereturn_analyzer)
+    # 记录 XGBoost 实验结果
+    if strategy_name == 'xgboost' and strat_obj is not None:
+        log_xgboost_experiment(strat_obj, metrics)
 
     return {
         'strategy': strategy_name,
         **metrics,
         'returns_series': returns_series
     }
+
+def log_xgboost_experiment(strat_obj, metrics):
+    """
+    记录 XGBoost 实验参数和结果到 JSON 文件
+    """
+    log_file = 'xgboost_experiments.json'
+    
+    # 获取模型参数
+    # 假设 strat_obj.models 是一个列表，我们取第一个模型的参数作为代表
+    # 或者记录所有模型的参数配置（如果它们是一样的）
+    params = {}
+    if hasattr(strat_obj, 'models') and strat_obj.models:
+        # 获取第一个模型的参数
+        first_model = strat_obj.models[0]
+        # XGBClassifier 的参数可以通过 get_params() 获取
+        try:
+            params = first_model.get_params()
+            # 移除一些不必要的或者太长的参数
+            keys_to_remove = [
+                'n_jobs', 'missing', 'monotone_constraints', 'interaction_constraints', 'enable_categorical',
+                'base_score', 'booster', 'callbacks', 'colsample_bylevel', 'colsample_bynode', 'device',
+                'early_stopping_rounds', 'feature_types', 'feature_weights', 'gamma', 'grow_policy',
+                'importance_type', 'max_bin', 'max_cat_threshold', 'max_cat_to_onehot', 'max_delta_step',
+                'max_leaves', 'min_child_weight', 'multi_strategy', 'num_parallel_tree', 'reg_alpha',
+                'reg_lambda', 'sampling_method', 'scale_pos_weight', 'tree_method', 'validate_parameters',
+                'verbosity'
+            ]
+            for k in keys_to_remove:
+                if k in params:
+                    del params[k]
+            
+            # 记录集成模型的数量
+            params['n_ensemble_models'] = len(strat_obj.models)
+            
+        except Exception as e:
+            print(f"获取 XGBoost 参数失败: {e}")
+            params = {"error": str(e)}
+    
+    # 构建日志条目
+    entry = {
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'parameters': params,
+        'metrics': metrics
+    }
+    
+    # 读取现有日志
+    logs = []
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+        except json.JSONDecodeError:
+            pass # 文件可能损坏或为空
+            
+    # 添加新条目
+    logs.append(entry)
+    
+    # 写入文件
+    try:
+        with open(log_file, 'w', encoding='utf-8') as f:
+            json.dump(logs, f, indent=4, ensure_ascii=False)
+        print(f"XGBoost 实验记录已保存至 {log_file}")
+    except Exception as e:
+        print(f"保存实验记录失败: {e}")
 
 # ============================= CLI Runner =============================
 def parse_args():
@@ -261,15 +332,16 @@ def main():
         # 生成信号
         positions = strat_obj.generate_positions(df)
         
-        print(f"正在回测策略: {name} ...")
         res = run_backtest(
             df,
             positions,
             name,
             apply_fees=args.apply_fees,
             capital=args.capital,
-            max_position=args.max_position
+            max_position=args.max_position,
+            strat_obj=strat_obj
         )
+        
         
         # 提取收益率序列用于绘图，并从结果中移除以免影响汇总表
         if 'returns_series' in res:
