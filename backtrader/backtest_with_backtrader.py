@@ -10,15 +10,11 @@ import json
 import datetime
 import os
 
-# Import Strategy Base and Concrete Strategies
-
-from strategy_base import Strategy
+# Import Concrete Strategies
 from basic_strategies import MovingAverageCross, RSIReversion, BollingerBreakout, BuyAndHold, MACDStrategy
-from ml_strategies import RandomForestStrategy
-from LSTM import LSTMStrategy
 from xgboost_strategy import XGBoostStrategy
 
-# ============================= Data Loading =============================
+# ============================= 数据加载 =============================
 def load_price_data(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, sep='\t', engine='python')
     df.columns = [c.strip().lower() for c in df.columns]
@@ -38,19 +34,32 @@ STRATEGY_MAP = {
     # 'boll_breakout': BollingerBreakout,
     # 'macd': MACDStrategy,
     'xgboost': XGBoostStrategy,
-    # 'random_forest': RandomForestStrategy,
-    # 'lstm': LSTMStrategy,
 }
 
-# ============================= Backtrader Classes =============================
+# ============================= Backtrader 类定义 =============================
 
-class SignalData(bt.feeds.PandasData):
+class MLData(bt.feeds.PandasData):
     """
-    扩展的 PandasData，包含 'signal' 列
+    扩展的 PandasData，包含机器学习特征
     """
-    lines = ('signal',)
+    lines = (
+        'ma5', 'ma10', 'ma20',
+        'rsi14',
+        'macd_dif', 'macd_dea', 'macd_bar',
+        'boll_upper', 'boll_lower',
+        'atr14'
+    )
     params = (
-        ('signal', -1), # 自动匹配列名
+        ('ma5', -1),
+        ('ma10', -1),
+        ('ma20', -1),
+        ('rsi14', -1),
+        ('macd_dif', -1),
+        ('macd_dea', -1),
+        ('macd_bar', -1),
+        ('boll_upper', -1),
+        ('boll_lower', -1),
+        ('atr14', -1),
     )
 
 class HKCommission(bt.CommInfoBase):
@@ -84,97 +93,38 @@ class HKCommission(bt.CommInfoBase):
         total = commission + platform_fee + sys_fee + stamp_duty + settlement_fee + trading_fee + sfc_levy + frc_levy
         return total
 
-class VectorizedSignalStrategy(bt.Strategy):
-    """
-    接收预计算信号并执行的 Backtrader 策略
-    """
-    params = (
-        ('max_position', 1.0),
-    )
-
-    def __init__(self):
-        self.signal = self.data.signal
-        self.total_commission = 0.0
-
-    def notify_order(self, order):
-        if order.status in [order.Completed]:
-            # 仅在 verbose 模式或调试时打印，这里为了回答用户问题默认打印关键交易
-            # 为了避免输出过多，可以只打印第一笔和最后一笔，或者全部打印
-            # 鉴于交易次数不多，全部打印
-            dt = bt.num2date(order.executed.dt).date()
-            print(f"[{dt}] {order.data._name} {'BUY' if order.isbuy() else 'SELL'} "
-                  f"Size: {order.executed.size:.2f} @ {order.executed.price:.4f} "
-                  f"Comm: {order.executed.comm:.2f} Cost: {order.executed.value:.2f}")
-            self.total_commission += order.executed.comm
-
-    def next(self):
-        # 获取当前信号权重
-        target_weight = self.signal[0]
-        
-        # 限制权重在 max_position 范围内
-        target_weight = max(min(target_weight, self.params.max_position), -self.params.max_position)
-        
-        # 计算目标市值
-        target_value = self.broker.getvalue() * target_weight
-        
-        # 预留手续费缓冲 (港股印花税0.1% + 佣金等，大资金时取整剩下的钱可能不够)
-        # 如果是做多，预留 0.5% 的资金
-        if target_weight > 0:
-            target_value *= 0.995
-
-        # 获取当前价格
-        price = self.data.close[0]
-        
-        if price > 0:
-            # 计算目标股数
-            target_size = target_value / price
-            
-            # 向下取整到 100 的倍数 (整手交易)
-            # int(x / 100) * 100 会将 199 -> 100, -199 -> -100
-            target_size = int(target_size / 100) * 100
-            
-            # 执行调仓
-            self.order_target_size(target=target_size)
-
-# ============================= Backtest Engine =============================
+# ============================= 回测引擎 =============================
 
 def run_backtest(
     df: pd.DataFrame,
-    positions: pd.Series,
-    strategy_name: str,
+    strategy_cls: bt.Strategy,
+    strategy_params: Dict = {},
+    strategy_name: str = "",
     apply_fees: bool = False,
     capital: float = 100000.0,
-    max_position: float = 1.0,
-    strat_obj: Optional[Strategy] = None,
 ) -> Dict:
-    
-    # 将信号合并到 DataFrame
-    data_df = df.copy()
-    data_df['signal'] = positions
     
     cerebro = bt.Cerebro()
     
-    data = SignalData(
-        dataname=data_df,
+    # 使用 MLData 以包含所有可能的列
+    data = MLData(
+        dataname=df,
         datetime=None,
         open='open',
         high='high',
         low='low',
         close='close',
         volume='volume',
-        signal='signal',
         openinterest=-1
     )
     cerebro.adddata(data)
     
-    cerebro.addstrategy(VectorizedSignalStrategy, max_position=max_position)
+    cerebro.addstrategy(strategy_cls, **strategy_params)
     cerebro.broker.setcash(capital)
     
     if apply_fees:
         cerebro.broker.addcommissioninfo(HKCommission())
     else:
-        # 无手续费，但必须显式设置为股票模式 (stocklike=True)
-        # 否则 Backtrader 默认为期货模式，导致资产计算和下单逻辑差异
         cerebro.broker.setcommission(commission=0.0, stocklike=True)
         
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='sharpe', riskfreerate=0.04, annualize=True)
@@ -206,18 +156,14 @@ def run_backtest(
     metrics['trade_count'] = total_trades
     metrics['win_rate'] = round(won_trades / total_trades, 6) if total_trades > 0 else 0.0
     
-    # 简单计算平均每笔交易收益 (近似值)
     metrics['avg_trade_return'] = 0.0 
+    metrics['total_commission'] = 0.0
     
-    # 获取总手续费
-    metrics['total_commission'] = round(strat_result.total_commission, 2)
-    
-    # 获取每日收益率序列
     timereturn_analyzer = strat_result.analyzers.timereturn.get_analysis()
     returns_series = pd.Series(timereturn_analyzer)
-    # 记录 XGBoost 实验结果
-    if strategy_name == 'xgboost' and strat_obj is not None:
-        log_xgboost_experiment(strat_obj, metrics)
+    
+    if strategy_name == 'xgboost':
+        log_xgboost_experiment(strat_result, metrics)
 
     return {
         'strategy': strategy_name,
@@ -226,22 +172,12 @@ def run_backtest(
     }
 
 def log_xgboost_experiment(strat_obj, metrics):
-    """
-    记录 XGBoost 实验参数和结果到 JSON 文件
-    """
     log_file = 'xgboost_experiments.json'
-    
-    # 获取模型参数
-    # 假设 strat_obj.models 是一个列表，我们取第一个模型的参数作为代表
-    # 或者记录所有模型的参数配置（如果它们是一样的）
     params = {}
-    if hasattr(strat_obj, 'models') and strat_obj.models:
-        # 获取第一个模型的参数
-        first_model = strat_obj.models[0]
-        # XGBClassifier 的参数可以通过 get_params() 获取
+    if hasattr(strat_obj.params, 'models') and strat_obj.params.models:
+        first_model = strat_obj.params.models[0]
         try:
             params = first_model.get_params()
-            # 移除一些不必要的或者太长的参数
             keys_to_remove = [
                 'n_jobs', 'missing', 'monotone_constraints', 'interaction_constraints', 'enable_categorical',
                 'base_score', 'booster', 'callbacks', 'colsample_bylevel', 'colsample_bynode', 'device',
@@ -254,34 +190,27 @@ def log_xgboost_experiment(strat_obj, metrics):
             for k in keys_to_remove:
                 if k in params:
                     del params[k]
-            
-            # 记录集成模型的数量
-            params['n_ensemble_models'] = len(strat_obj.models)
-            
+            params['n_ensemble_models'] = len(strat_obj.params.models)
         except Exception as e:
             print(f"获取 XGBoost 参数失败: {e}")
             params = {"error": str(e)}
     
-    # 构建日志条目
     entry = {
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'parameters': params,
         'metrics': metrics
     }
     
-    # 读取现有日志
     logs = []
     if os.path.exists(log_file):
         try:
             with open(log_file, 'r', encoding='utf-8') as f:
                 logs = json.load(f)
         except json.JSONDecodeError:
-            pass # 文件可能损坏或为空
+            pass
             
-    # 添加新条目
     logs.append(entry)
     
-    # 写入文件
     try:
         with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(logs, f, indent=4, ensure_ascii=False)
@@ -289,7 +218,7 @@ def log_xgboost_experiment(strat_obj, metrics):
     except Exception as e:
         print(f"保存实验记录失败: {e}")
 
-# ============================= CLI Runner =============================
+# ============================= 命令行运行器 =============================
 def parse_args():
     p = argparse.ArgumentParser(description='Backtrader 回测框架')
     p.add_argument('--file', default='data/data_with_indicators.txt', help='数据文件路径 (含OHLC)')
@@ -299,7 +228,6 @@ def parse_args():
     p.add_argument('--output', help='结果保存CSV文件名')
     p.add_argument('--apply-fees', action='store_true', help='启用港股手续费扣除')
     p.add_argument('--capital', type=float, default=100000.0, help='初始资金')
-    p.add_argument('--max-position', type=float, default=1.0, help='持仓权重上限（绝对值）')
     return p.parse_args()
 
 def main():
@@ -325,31 +253,30 @@ def main():
             continue
         
         strategy_cls = STRATEGY_MAP[name]
-        # 实例化策略对象以调用 prepare
-        strat_obj = strategy_cls()
-        strat_obj.prepare(str(path))
+        params = {}
         
-        # 生成信号
-        positions = strat_obj.generate_positions(df)
+        if name == 'xgboost':
+            # 先训练模型
+            models = XGBoostStrategy.train_model(str(path))
+            if not models:
+                print("XGBoost training failed or no models returned. Skipping.")
+                continue
+            params['models'] = models
         
         res = run_backtest(
             df,
-            positions,
-            name,
+            strategy_cls,
+            strategy_params=params,
+            strategy_name=name,
             apply_fees=args.apply_fees,
             capital=args.capital,
-            max_position=args.max_position,
-            strat_obj=strat_obj
         )
         
-        
-        # 提取收益率序列用于绘图，并从结果中移除以免影响汇总表
         if 'returns_series' in res:
             equity_curves[name] = res.pop('returns_series')
             
         results.append(res)
 
-    # 汇总输出
     summary_df = pd.DataFrame(results)
     print('\nBacktrader 回测结果汇总:')
     print(summary_df.to_string(index=False))
@@ -358,20 +285,14 @@ def main():
         summary_df.to_csv(args.output, index=False)
         print(f'结果已保存: {args.output}')
         
-    # 绘制收益曲线
     try:
         import matplotlib.pyplot as plt
         
         plt.figure(figsize=(12, 8))
         
         for name, ret_series in equity_curves.items():
-            # 将索引转换为 datetime 对象 (如果还不是)
             ret_series.index = pd.to_datetime(ret_series.index)
-            
-            # 计算累计收益 (净值曲线)
-            # 初始资金 * (1 + 收益率).cumprod()
             equity_curve = args.capital * (1 + ret_series).cumprod()
-            
             plt.plot(equity_curve.index, equity_curve.values, label=name)
             
         plt.title('Strategy Equity Curves Comparison')
@@ -380,16 +301,12 @@ def main():
         plt.legend()
         plt.grid(True)
         
-        # 保存图片
         plot_filename = 'strategy_comparison.png'
         if args.output:
             plot_filename = str(Path(args.output).with_suffix('.png'))
             
         plt.savefig(plot_filename)
         print(f"收益曲线图已保存至: {plot_filename}")
-        
-        # 尝试显示 (如果在支持 GUI 的环境中)
-        # plt.show()
         
     except ImportError:
         print("未安装 matplotlib，跳过绘图。")

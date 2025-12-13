@@ -22,5 +22,609 @@
             "avg_trade_return": 0.0,
             "total_commission": 0.0
         }
+    },
+    {
+        "timestamp": "2025-11-28 17:24:13",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.5388,
+            "cagr": 0.402642,
+            "max_drawdown": 0.057137,
+            "sharpe": 1.323611,
+            "trade_count": 14,
+            "win_rate": 0.857143,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-28 17:24:35",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.015,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.5286,
+            "cagr": 0.395338,
+            "max_drawdown": 0.07524,
+            "sharpe": 1.339388,
+            "trade_count": 16,
+            "win_rate": 0.6875,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-28 17:24:54",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.6618,
+            "cagr": 0.489926,
+            "max_drawdown": 0.073874,
+            "sharpe": 2.201022,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-28 17:25:06",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.607492,
+            "cagr": 0.451565,
+            "max_drawdown": 0.07601,
+            "sharpe": 2.222377,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 5430.78
+        }
+    },
+    {
+        "timestamp": "2025-11-29 21:59:03",
+        "parameters": {},
+        "metrics": {
+            "total_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "sharpe": 0.0,
+            "trade_count": 0,
+            "win_rate": 0.0,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-29 22:03:23",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.751,
+            "cagr": 0.552355,
+            "max_drawdown": 0.070203,
+            "sharpe": 1.957331,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-29 22:03:46",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.678444,
+            "cagr": 0.501628,
+            "max_drawdown": 0.07289,
+            "sharpe": 1.82941,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 5415.63
+        }
+    },
+    {
+        "timestamp": "2025-11-29 22:06:27",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 114514,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.6618,
+            "cagr": 0.489926,
+            "max_drawdown": 0.073874,
+            "sharpe": 2.201022,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-11-29 22:06:44",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 114514,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.607492,
+            "cagr": 0.451565,
+            "max_drawdown": 0.07601,
+            "sharpe": 2.222377,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 5430.78
+        }
+    },
+    {
+        "timestamp": "2025-11-29 22:07:29",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.678444,
+            "cagr": 0.501628,
+            "max_drawdown": 0.07289,
+            "sharpe": 1.82941,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 5415.63
+        }
+    },
+    {
+        "timestamp": "2025-12-13 21:47:03",
+        "parameters": {},
+        "metrics": {
+            "total_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "sharpe": 0.0,
+            "trade_count": 0,
+            "win_rate": 0.0,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 21:49:37",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.751,
+            "cagr": 0.552355,
+            "max_drawdown": 0.070203,
+            "sharpe": 1.957331,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 21:50:02",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.678444,
+            "cagr": 0.501628,
+            "max_drawdown": 0.07289,
+            "sharpe": 1.82941,
+            "trade_count": 15,
+            "win_rate": 0.866667,
+            "avg_trade_return": 0.0,
+            "total_commission": 5415.63
+        }
+    },
+    {
+        "timestamp": "2025-12-13 21:51:28",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.03,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.6858,
+            "cagr": 0.506792,
+            "max_drawdown": 0.091081,
+            "sharpe": 3.188677,
+            "trade_count": 17,
+            "win_rate": 0.705882,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:05:01",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.03,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.21663,
+            "cagr": 0.166416,
+            "max_drawdown": 0.11095,
+            "sharpe": 0.838842,
+            "trade_count": 13,
+            "win_rate": 0.615385,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:05:54",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.479076,
+            "cagr": 0.359723,
+            "max_drawdown": 0.077034,
+            "sharpe": 151.253199,
+            "trade_count": 12,
+            "win_rate": 0.666667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:14:48",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.329242,
+            "cagr": 0.25036,
+            "max_drawdown": 0.111008,
+            "sharpe": 2.275573,
+            "trade_count": 19,
+            "win_rate": 0.631579,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:18:21",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.440002,
+            "cagr": 0.331443,
+            "max_drawdown": 0.110762,
+            "sharpe": 4.806524,
+            "trade_count": 12,
+            "win_rate": 0.75,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:18:57",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.440002,
+            "cagr": 0.331443,
+            "max_drawdown": 0.110762,
+            "sharpe": 4.806524,
+            "trade_count": 12,
+            "win_rate": 0.75,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:21:12",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 300,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.365026,
+            "cagr": 0.276709,
+            "max_drawdown": 0.110869,
+            "sharpe": 4.589418,
+            "trade_count": 14,
+            "win_rate": 0.571429,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:22:23",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 200,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.440002,
+            "cagr": 0.331443,
+            "max_drawdown": 0.110762,
+            "sharpe": 4.806524,
+            "trade_count": 12,
+            "win_rate": 0.75,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:24:06",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.02,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.479076,
+            "cagr": 0.359723,
+            "max_drawdown": 0.077034,
+            "sharpe": 151.253199,
+            "trade_count": 12,
+            "win_rate": 0.666667,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:32:35",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.641488,
+            "cagr": 0.47561,
+            "max_drawdown": 0.077163,
+            "sharpe": 2.348508,
+            "trade_count": 6,
+            "win_rate": 0.833333,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:32:53",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.005,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.0276,
+            "cagr": 0.021604,
+            "max_drawdown": 0.042068,
+            "sharpe": -1.898551,
+            "trade_count": 2,
+            "win_rate": 0.5,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:33:20",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.641488,
+            "cagr": 0.47561,
+            "max_drawdown": 0.077163,
+            "sharpe": 2.348508,
+            "trade_count": 6,
+            "win_rate": 0.833333,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
+    },
+    {
+        "timestamp": "2025-12-13 22:35:02",
+        "parameters": {
+            "objective": "binary:logistic",
+            "colsample_bytree": 0.8,
+            "eval_metric": "logloss",
+            "learning_rate": 0.01,
+            "max_depth": 5,
+            "n_estimators": 100,
+            "random_state": 42,
+            "subsample": 0.8,
+            "n_ensemble_models": 50
+        },
+        "metrics": {
+            "total_return": 0.613059,
+            "cagr": 0.45551,
+            "max_drawdown": 0.077165,
+            "sharpe": 2.260244,
+            "trade_count": 6,
+            "win_rate": 0.833333,
+            "avg_trade_return": 0.0,
+            "total_commission": 0.0
+        }
     }
 ]

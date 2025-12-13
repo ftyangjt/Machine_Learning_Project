@@ -1,107 +1,87 @@
+import backtrader as bt
 import pandas as pd
 import numpy as np
-try:
-    from .strategy_base import Strategy
-except ImportError:
-    from strategy_base import Strategy
 
-class MovingAverageCross(Strategy):
-    name = "ma_cross"
+class MovingAverageCross(bt.Strategy):
+    params = (
+        ('fast', 5),
+        ('slow', 20),
+    )
 
-    def __init__(self, fast: int = 5, slow: int = 20):
-        self.fast = fast
-        self.slow = slow
+    def __init__(self):
+        self.fast_ma = bt.indicators.SMA(self.data.close, period=self.params.fast)
+        self.slow_ma = bt.indicators.SMA(self.data.close, period=self.params.slow)
 
-    def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        close = df['close']
-        fast_ma = close.rolling(self.fast, min_periods=1).mean()
-        slow_ma = close.rolling(self.slow, min_periods=1).mean()
-        signal = (fast_ma > slow_ma).astype(int)
-        return signal
+    def next(self):
+        if not self.position:
+            if self.fast_ma[0] > self.slow_ma[0]:
+                self.order_target_percent(target=0.99)
+        elif self.fast_ma[0] < self.slow_ma[0]:
+            self.close()
 
 
-class RSIReversion(Strategy):
-    name = "rsi_reversion"
+class RSIReversion(bt.Strategy):
+    params = (
+        ('period', 14),
+        ('low', 30.0),
+        ('high', 70.0),
+    )
 
-    def __init__(self, period: int = 14, low: float = 30.0, high: float = 70.0):
-        self.period = period
-        self.low = low
-        self.high = high
+    def __init__(self):
+        self.rsi = bt.indicators.RSI(self.data.close, period=self.params.period)
 
-    def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        # 如果已有 rsi14 列，复用；否则计算
-        if 'rsi14' in df.columns and df['rsi14'].notna().any() and self.period == 14:
-            rsi = df['rsi14']
+    def next(self):
+        if not self.position:
+            if self.rsi[0] < self.params.low:
+                self.order_target_percent(target=0.99)
         else:
-            close = df['close']
-            delta = close.diff()
-            gain = delta.clip(lower=0).rolling(self.period).mean()
-            loss = (-delta.clip(upper=0)).rolling(self.period).mean()
-            rs = gain / (loss.replace(0, np.nan))
-            rsi = 100 - (100 / (1 + rs))
-        pos = pd.Series(0, index=df.index)
-        pos[rsi < self.low] = 1
-        pos[rsi > self.high] = 0
-        return pos.ffill().fillna(0)
+            if self.rsi[0] > self.params.high:
+                self.close()
 
 
-class BollingerBreakout(Strategy):
-    name = "boll_breakout"
+class BollingerBreakout(bt.Strategy):
+    params = (
+        ('period', 20),
+        ('devfactor', 2.0),
+    )
 
-    def __init__(self, period: int = 20, num_std: float = 2.0):
-        self.period = period
-        self.num_std = num_std
+    def __init__(self):
+        self.boll = bt.indicators.BollingerBands(self.data.close, period=self.params.period, devfactor=self.params.devfactor)
 
-    def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        close = df['close']
-        if all(c in df.columns for c in ['boll_mid', 'boll_upper', 'boll_lower']):
-            mid = df['boll_mid']
-            upper = df['boll_upper']
-            lower = df['boll_lower']
+    def next(self):
+        if not self.position:
+            if self.data.close[0] > self.boll.lines.top[0]:
+                self.order_target_percent(target=0.99)
         else:
-            mid = close.rolling(self.period, min_periods=1).mean()
-            std = close.rolling(self.period, min_periods=1).std()
-            upper = mid + self.num_std * std
-            lower = mid - self.num_std * std
-        signal = pd.Series(0, index=df.index)
-        signal[close > upper] = 1  # 突破做多
-        signal[close < lower] = 0  # 跌破下轨清仓
-        return signal.ffill().fillna(0)
+            if self.data.close[0] < self.boll.lines.bot[0]:
+                self.close()
 
 
-class BuyAndHold(Strategy):
-    name = "buy_hold"
-
-    def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        # 始终持有，权重为 1
-        return pd.Series(1.0, index=df.index)
+class BuyAndHold(bt.Strategy):
+    def next(self):
+        if not self.position:
+            self.order_target_percent(target=0.99)
 
 
-class MACDStrategy(Strategy):
-    name = "macd"
+class MACDStrategy(bt.Strategy):
+    params = (
+        ('fast', 12),
+        ('slow', 26),
+        ('signal', 9),
+    )
 
-    def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-        self.fast = fast
-        self.slow = slow
-        self.signal = signal
+    def __init__(self):
+        self.macd = bt.indicators.MACD(
+            self.data.close,
+            period_me1=self.params.fast,
+            period_me2=self.params.slow,
+            period_signal=self.params.signal
+        )
 
-    def generate_positions(self, df: pd.DataFrame) -> pd.Series:
-        # 优先使用数据中已有的 MACD 列 (假设参数匹配默认值 12, 26, 9)
-        if all(c in df.columns for c in ['macd_dif', 'macd_dea']) and self.fast == 12 and self.slow == 26 and self.signal == 9:
-            dif = df['macd_dif']
-            dea = df['macd_dea']
+    def next(self):
+        if not self.position:
+            if self.macd.macd[0] > self.macd.signal[0]:
+                self.order_target_percent(target=0.99)
         else:
-            # 手动计算 MACD
-            close = df['close']
-            ema_fast = close.ewm(span=self.fast, adjust=False).mean()
-            ema_slow = close.ewm(span=self.slow, adjust=False).mean()
-            dif = ema_fast - ema_slow
-            dea = dif.ewm(span=self.signal, adjust=False).mean()
-        
-        # 策略逻辑：DIF > DEA (金叉/多头区域) 持有，DIF < DEA (死叉/空头区域) 空仓
-        pos = pd.Series(0, index=df.index)
-        pos[dif > dea] = 1
-        pos[dif < dea] = 0
-        
-        # 填充 NaN (通常是前几个数据点)
-        return pos.fillna(0)
+            if self.macd.macd[0] < self.macd.signal[0]:
+                self.close()
