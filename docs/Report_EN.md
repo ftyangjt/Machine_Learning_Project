@@ -1,4 +1,6 @@
-# Machine Learning Training Report: XGBoost-Based Timing Enhancement Strategy for Tencent Holdings
+# XGBoost-Based Timing Enhancement Strategy for Tencent Holdings
+
+Group Members: 杨景添、管正航
 
 ## 1. Overview
 
@@ -137,6 +139,10 @@ To comprehensively evaluate the effectiveness of the XGBoost strategy, we compar
 | MACD Strategy | 31.95% | 24.31% | 15.40% | 1.40 | 9 | 44.44% |
 | RSI Reversion | 19.76% | 15.21% | 2.16% | 0.60 | 1 | 100.00% |
 | Bollinger Breakout | -1.37% | -1.08% | 29.42% | -0.64 | 4 | 75.00% |
+
+The figure below shows the return performance of each strategy.
+
+![alt text](../strategy_comparison.png)
 
 **Analysis**:
 

@@ -17,7 +17,6 @@ Machine_Learning_Project/
 │   ├── Report_EN.md                 # Full Project Report (English)
 │   ├── Report_CN.md                 # Full Project Report (Chinese)
 │   └── XGBoost_Strategy_Logic.md    # Detailed logic of the XGBoost strategy
-├── xgboost_experiments.json    # Log file for XGBoost experiment metrics and parameters
 ├── requirements.txt            # Python dependencies
 └── README.md                   # Project documentation
 ```
