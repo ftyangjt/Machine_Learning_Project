@@ -29,10 +29,10 @@ def load_price_data(path: Path) -> pd.DataFrame:
 
 STRATEGY_MAP = {
     'buy_hold': BuyAndHold,
-    # 'ma_cross': MovingAverageCross,
-    # 'rsi_reversion': RSIReversion,
-    # 'boll_breakout': BollingerBreakout,
-    # 'macd': MACDStrategy,
+    'ma_cross': MovingAverageCross,
+    'rsi_reversion': RSIReversion,
+    'boll_breakout': BollingerBreakout,
+    'macd': MACDStrategy,
     'xgboost': XGBoostStrategy,
 }
 
@@ -186,62 +186,12 @@ def run_backtest(
     
     timereturn_analyzer = strat_result.analyzers.timereturn.get_analysis()
     returns_series = pd.Series(timereturn_analyzer)
-    
-    if strategy_name == 'xgboost':
-        log_xgboost_experiment(strat_result, metrics)
 
     return {
         'strategy': strategy_name,
         **metrics,
         'returns_series': returns_series
     }
-
-def log_xgboost_experiment(strat_obj, metrics):
-    log_file = 'xgboost_experiments.json'
-    params = {}
-    if hasattr(strat_obj.params, 'models') and strat_obj.params.models:
-        first_model = strat_obj.params.models[0]
-        try:
-            params = first_model.get_params()
-            keys_to_remove = [
-                'n_jobs', 'missing', 'monotone_constraints', 'interaction_constraints', 'enable_categorical',
-                'base_score', 'booster', 'callbacks', 'colsample_bylevel', 'colsample_bynode', 'device',
-                'early_stopping_rounds', 'feature_types', 'feature_weights', 'gamma', 'grow_policy',
-                'importance_type', 'max_bin', 'max_cat_threshold', 'max_cat_to_onehot', 'max_delta_step',
-                'max_leaves', 'min_child_weight', 'multi_strategy', 'num_parallel_tree', 'reg_alpha',
-                'reg_lambda', 'sampling_method', 'scale_pos_weight', 'tree_method', 'validate_parameters',
-                'verbosity'
-            ]
-            for k in keys_to_remove:
-                if k in params:
-                    del params[k]
-            params['n_ensemble_models'] = len(strat_obj.params.models)
-        except Exception as e:
-            print(f"获取 XGBoost 参数失败: {e}")
-            params = {"error": str(e)}
-    
-    entry = {
-        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'parameters': params,
-        'metrics': metrics
-    }
-    
-    logs = []
-    if os.path.exists(log_file):
-        try:
-            with open(log_file, 'r', encoding='utf-8') as f:
-                logs = json.load(f)
-        except json.JSONDecodeError:
-            pass
-            
-    logs.append(entry)
-    
-    try:
-        with open(log_file, 'w', encoding='utf-8') as f:
-            json.dump(logs, f, indent=4, ensure_ascii=False)
-        print(f"XGBoost 实验记录已保存至 {log_file}")
-    except Exception as e:
-        print(f"保存实验记录失败: {e}")
 
 # ============================= 命令行运行器 =============================
 def parse_args():

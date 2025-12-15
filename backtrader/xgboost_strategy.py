@@ -79,15 +79,12 @@ class XGBoostStrategy(bt.Strategy):
         avg_prob /= len(self.params.models)
         
         # 简单的阈值策略 (Simple Threshold Strategy)
-        # 概率 > 0.55 -> 满仓
-        # 概率 < 0.45 -> 空仓
-        # 中间 -> 保持
         
         target_pct = None
         
-        if avg_prob > 0.536190692289932:
+        if avg_prob > 0.52:
             target_pct = 0.99
-        elif avg_prob < 0.39220149920251607:
+        elif avg_prob < 0.40:
             target_pct = 0.0
             
         if target_pct is not None:
@@ -180,11 +177,11 @@ class XGBoostStrategy(bt.Strategy):
         for i in range(n_models):
             seed = 42 + i
             model = xgb.XGBClassifier(
-                n_estimators=89,     # 增加树的数量，让模型学得更充分
-                learning_rate=0.020413194096776208,
+                n_estimators=90,
+                learning_rate=0.02,
                 max_depth=5,
-                subsample=0.8537022287782905,
-                colsample_bytree=0.7887832539836627,
+                subsample=0.85,
+                colsample_bytree=0.80,
                 random_state=seed,
                 eval_metric='logloss',
                 n_jobs=-1
