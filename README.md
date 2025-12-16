@@ -8,16 +8,17 @@ This project explores the application of machine learning algorithms in quantita
 Machine_Learning_Project/
 ├── backtrader/                 # Core backtesting code
 │   ├── backtest_with_backtrader.py  # Main entry point for backtesting
-│   ├── xgboost_strategy.py          # XGBoost machine learning strategy implementation
-│   └── basic_strategies.py          # Traditional technical strategies (MA, RSI, MACD, etc.)
+│   ├── basic_strategies.py          # Traditional technical strategies (MA, RSI, MACD, etc.)
+│   └── xgboost_strategy.py          # XGBoost machine learning strategy implementation
 ├── data/                       # Data files and processing scripts
-│   ├── data_with_indicators.txt     # Preprocessed data with technical indicators
-│   └── data_process_scripts/        # Scripts for data cleaning and indicator calculation
+│   ├── add_indicators.py            # Script to add indicators to data
+│   ├── data.txt                     # Raw data file
+│   └── data_with_indicators.txt     # Preprocessed data with technical indicators
 ├── docs/                       # Documentation
-│   ├── Report_EN.md                 # Full Project Report (English)
-│   ├── Report_CN.md                 # Full Project Report (Chinese)
-│   └── XGBoost_Strategy_Logic.md    # Detailed logic of the XGBoost strategy
+│   ├── Report_EN.pdf                # Full Project Report (English PDF)
+│   └── Report_EN.tex                # Full Project Report (English TeX Source)
 ├── requirements.txt            # Python dependencies
+├── strategy_comparison.png     # Strategy comparison chart
 └── README.md                   # Project documentation
 ```
 
